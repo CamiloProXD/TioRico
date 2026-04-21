@@ -56,7 +56,7 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation(libs.play.services.coroutines)
     implementation(libs.androidx.compose.foundation)
-    
+
     // Credentials and Google Sign-In
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
