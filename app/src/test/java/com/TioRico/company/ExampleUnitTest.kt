@@ -1,4 +1,4 @@
-package com.example.tiorico
+package com.TioRico.company
 
 import org.junit.Test
 

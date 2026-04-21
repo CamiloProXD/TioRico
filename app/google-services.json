@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "772237618484",
+    "project_id": "tiorico-199dd",
+    "storage_bucket": "tiorico-199dd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:772237618484:android:fd5358d0439300722f4961",
+        "android_client_info": {
+          "package_name": "com.TioRico.company"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "772237618484-ce25k7ojkcnept33pub3a50l4ghriccr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.TioRico.company",
+            "certificate_hash": "2eae39fc9d0027ea5dd703e1b0a1eaa08db87faf"
+          }
+        },
+        {
+          "client_id": "772237618484-l8htk7ngh6gh99eutvaf3gcjts0625qt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCe9K1c39eICTn4hqpBjsXKPrIxH2-UO6k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "772237618484-l8htk7ngh6gh99eutvaf3gcjts0625qt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
