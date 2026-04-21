@@ -1,4 +1,6 @@
 
+package com.TioRico.company.viewmodel
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.TioRico.company.models.*

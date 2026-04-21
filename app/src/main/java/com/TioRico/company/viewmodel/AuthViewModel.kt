@@ -1,7 +1,10 @@
+package com.TioRico.company.viewmodel
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.TioRico.company.repository.AuthRepository
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -9,10 +12,10 @@ class AuthViewModel(private val repository: AuthRepository = AuthRepository()) :
 
     val currentUser: StateFlow<FirebaseUser?> = repository.currentUser
 
-    private val _loading = kotlinx.coroutines.flow.MutableStateFlow(false)
+    private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
-    private val _error = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+    private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
     fun signIn(email: String, password: String, onSuccess: () -> Unit) {
