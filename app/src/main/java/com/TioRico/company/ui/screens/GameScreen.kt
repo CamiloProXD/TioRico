@@ -135,13 +135,21 @@ fun GameScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Text("Connected players: ${currentRoom.players.size}", color = Color.White)
                         
-                        if (currentRoom.players.size >= 1) { // Normal 2
+                        if (currentRoom.players.size >= 2) { 
                              Button(
                                  onClick = { gameViewModel.startGame(currentRoom.id, currentRoom.goal) },
-                                 colors = ButtonDefaults.buttonColors(containerColor = YellowAccent)
+                                 colors = ButtonDefaults.buttonColors(containerColor = YellowAccent),
+                                 modifier = Modifier.padding(top = 16.dp)
                              ) {
-                                 Text("Start Game", color = Color.Black)
+                                 Text("Start Game", color = Color.Black, fontWeight = FontWeight.Bold)
                              }
+                        } else {
+                            Text(
+                                "Waiting for more players to start...",
+                                color = Color.Gray,
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(top = 16.dp)
+                            )
                         }
                     }
                 }

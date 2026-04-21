@@ -13,6 +13,8 @@ class GameViewModel(private val repository: GameRepository = GameRepository()) :
     private val _room = MutableStateFlow<GameRoom?>(null)
     val room: StateFlow<GameRoom?> = _room.asStateFlow()
 
+    private var roomJob: kotlinx.coroutines.Job? = null
+
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
@@ -76,7 +78,8 @@ class GameViewModel(private val repository: GameRepository = GameRepository()) :
     }
 
     private fun observeRoom(roomId: String) {
-        viewModelScope.launch {
+        roomJob?.cancel()
+        roomJob = viewModelScope.launch {
             repository.getRoom(roomId).collect {
                 _room.value = it
             }
@@ -88,10 +91,13 @@ class GameViewModel(private val repository: GameRepository = GameRepository()) :
     }
 
     fun leaveRoom(roomId: String, playerId: String) {
+        // Clear locally first to avoid race conditions with navigation
+        roomJob?.cancel()
+        _room.value = null
+        
         viewModelScope.launch {
             try {
                 repository.leaveRoom(roomId, playerId)
-                _room.value = null
             } catch (e: Exception) {
                 _error.value = e.message
             }

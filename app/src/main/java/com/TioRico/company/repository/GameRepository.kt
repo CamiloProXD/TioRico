@@ -14,7 +14,11 @@ class GameRepository(private val db: FirebaseFirestore = FirebaseFirestore.getIn
     private val roomsCollection = db.collection("rooms")
 
     fun getRoom(roomId: String): Flow<GameRoom?> = callbackFlow {
-        val subscription = roomsCollection.document(roomId).addSnapshotListener { snapshot, _ ->
+        val subscription = roomsCollection.document(roomId).addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
             if (snapshot != null && snapshot.exists()) {
                 try {
                     val room = snapshot.toObject<GameRoom>()
@@ -109,13 +113,21 @@ class GameRepository(private val db: FirebaseFirestore = FirebaseFirestore.getIn
             val updatedHistory = room.history.toMutableList()
             updatedHistory.add(historyItem)
 
-            // Determine next turn
-            val activePlayerIds = room.players.filterValues { !it.isEliminated }.keys.toList().sorted()
-            val currentIndex = activePlayerIds.indexOf(playerId)
+            // Determine next turn - skip eliminated players
+            val updatedActivePlayers = updatedPlayers.filterValues { !it.isEliminated }
+            val activePlayerIds = updatedActivePlayers.keys.toList().sorted()
             
-            // Round synchronization: Round only ends when the LAST active player in the sorted list finishes their turn
-            val isEndOfRound = currentIndex == activePlayerIds.size - 1
-            val nextPlayerId = if (isEndOfRound) activePlayerIds[0] else activePlayerIds[currentIndex + 1]
+            // Round synchronization: Round ends when the current player WAS the last one in the PREVIOUS active list
+            val previousActivePlayerIds = room.players.filterValues { !it.isEliminated }.keys.toList().sorted()
+            val currentIndexInOldList = previousActivePlayerIds.indexOf(playerId)
+            val isEndOfRound = currentIndexInOldList == previousActivePlayerIds.size - 1
+
+            var nextPlayerId = room.currentTurnPlayerId
+            if (activePlayerIds.isNotEmpty()) {
+                val nextIndex = (activePlayerIds.indexOf(playerId).takeIf { it != -1 } ?: -1) + 1
+                nextPlayerId = if (nextIndex >= activePlayerIds.size) activePlayerIds[0] else activePlayerIds[nextIndex]
+            }
+
             val nextRoundCount = if (isEndOfRound) room.turnCount + 1 else room.turnCount
 
             var newStatus = room.status
@@ -210,11 +222,16 @@ class GameRepository(private val db: FirebaseFirestore = FirebaseFirestore.getIn
                 // Self-destruct: Delete room if empty
                 transaction.delete(roomRef)
             } else {
-                // If the player who left was the current turn holder, move turn to next
+                // If the player who left was the current turn holder, move turn to next active
                 var nextTurnId = room.currentTurnPlayerId
                 if (room.currentTurnPlayerId == playerId) {
-                    val remainingIds = updatedPlayers.keys.toList().sorted()
-                    nextTurnId = remainingIds[0]
+                    val remainingActiveIds = updatedPlayers.filterValues { !it.isEliminated }.keys.toList().sorted()
+                    if (remainingActiveIds.isNotEmpty()) {
+                        nextTurnId = remainingActiveIds[0]
+                    } else {
+                        // If no active players left, just pick anyone or let game end
+                        nextTurnId = updatedPlayers.keys.first()
+                    }
                 }
                 
                 transaction.update(roomRef, mapOf(

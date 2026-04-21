@@ -83,36 +83,47 @@ fun TioRicoApp(
             )
         }
         composable("game") {
-            val roomId = gameViewModel.room.value?.id
+            val room by gameViewModel.room.collectAsState()
+            val roomId = room?.id
             val userId = authViewModel.getCurrentUserId()
             
             GameScreen(
                 authViewModel = authViewModel,
                 gameViewModel = gameViewModel,
-                onGameEnd = { navController.navigate("result") },
+                onGameEnd = { 
+                    navController.navigate("result") {
+                        // Keep lobby in stack but replace game with result
+                        popUpTo("game") { inclusive = true }
+                    }
+                },
                 onExit = { 
                     if (roomId != null && userId != null) {
                         gameViewModel.leaveRoom(roomId, userId)
                     }
                     navController.navigate("lobby") {
-                        popUpTo("game") { inclusive = true }
+                        popUpTo("lobby") { inclusive = true }
                     }
                 }
             )
         }
         composable("result") {
-            val roomId = gameViewModel.room.value?.id
+            val room by gameViewModel.room.collectAsState()
+            val roomId = room?.id
             val userId = authViewModel.getCurrentUserId()
             
             ResultScreen(
                 gameViewModel = gameViewModel,
                 onPlayAgain = {
                     if (roomId != null && userId != null) gameViewModel.leaveRoom(roomId, userId)
-                    navController.navigate("lobby")
+                    navController.navigate("lobby") {
+                        popUpTo("lobby") { inclusive = true }
+                    }
                 },
                 onExit = {
                     if (roomId != null && userId != null) gameViewModel.leaveRoom(roomId, userId)
-                    navController.navigate("lobby")
+                    navController.navigate("lobby") {
+                        popUpTo("lobby") { inclusive = true }
+                    }
                 }
             )
         }
